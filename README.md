@@ -81,6 +81,7 @@ export default {
 # API
 
 `v-dragging="{ item: color, group: 'color' }"`
+
 `v-dragevent="{ group: 'color', list: colors, dragged: handleDragged, dragend: handleDragend }"`
 #### Arguments:
 
@@ -91,7 +92,9 @@ export default {
  * `{dragend} Function`
 
  `group` is unique key of dragable list.
+
  `dragged` is dragged event function.
+ 
  `dragend` is dragend event function.
 
 #### Example
