@@ -68,10 +68,10 @@ export default {
 </script>
 
 <template>
-  <div class="color-list">
+  <div class="color-list" v-dragevent="{ group: 'color', list: colors}">
       <div 
           class="color-item" 
-          v-for="color in colors" v-dragging="{ item: color, list: colors, group: 'color' }"
+          v-for="color in colors" v-dragging="{ item: color, group: 'color' }"
           :key="color.text"
       >{{color.text}}</div>
   </div>
@@ -80,33 +80,37 @@ export default {
 
 # API
 
-`v-dragging="{ item: color, list: colors, group: 'color' }"`
-
+`v-dragging="{ item: color, group: 'color' }"`
+`v-dragevent="{ group: 'color', list: colors, dragged: handleDragged, dragend: handleDragend }"`
 #### Arguments:
 
- * `{item} Object`
- * `{list} Array`
- * `{group} String`
+ * `{item} Object require`
+ * `{list} Array require`
+ * `{group} String require`
+ * `{dragged} Function`
+ * `{dragend} Function`
 
  `group` is unique key of dragable list.
+ `dragged` is dragged event function.
+ `dragend` is dragend event function.
 
 #### Example
 
 ``` html
 <!-- Vue2.0 -->
-<div class="color-list">
+<div class="color-list" v-dragevent="{ group: 'color', list: colors}">
     <div 
         class="color-item" 
-        v-for="color in colors" v-dragging="{ item: color, list: colors, group: 'color' }"
+        v-for="color in colors" v-dragging="{ item: color, group: 'color' }"
         :key="color.text"
     >{{color.text}}</div>
 </div>
 
 <!-- Vue1.0 -->
-<div class="color-list">
+<div class="color-list" v-dragevent="{ group: 'color', list: colors}">
     <div 
         class="color-item" 
-        v-for="color in colors" v-dragging="{ item: color, list: colors, group: 'color', key: color.text }"
+        v-for="color in colors" v-dragging="{ item: color, group: 'color', key: color.text }"
         track-by="text"
     >{{color.text}}</div>
 </div>
@@ -115,10 +119,10 @@ export default {
 #### Event
 
 ``` html
-<div class="color-list">
+<div class="color-list" v-dragevent="{ group: 'color', list: colors, dragged: handleDragged, dragend: handleDragend }">
     <div 
         class="color-item" 
-        v-for="color in colors" v-dragging="{ item: color, list: colors, group: 'color', otherData: otherData }"
+        v-for="color in colors" v-dragging="{ item: color, group: 'color', otherData: otherData }"
         :key="color.text"
     >{{color.text}}</div>
 </div>
@@ -126,20 +130,16 @@ export default {
 
 ``` javascript
 export default {
-  mounted () {
-    this.$dragging.$on('dragged', ({ value }) => {
-      console.log(value.item)
-      console.log(value.list)
-      console.log(value.otherData)
-    })
-    this.$dragging.$on('dragend', () => {
-        
-    })
-  }
+    methods: {
+        handleDragged: function(data) {
+            console.log('dragged', data)
+        },
+        handleDragend: function(data) {
+            console.log('dragend', data)
+        }
+    }
 }
 ```
-
-
 
 # License
 

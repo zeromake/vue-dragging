@@ -1,5 +1,6 @@
-import Vue from '../../node_modules/vue/dist/vue.esm.js';
+import Vue from '../../node_modules/vue/dist/vue.esm';
 import VueDragging from '../../vue-dragging.js'
+import VueRouter from '../../node_modules/vue-router/dist/vue-router.esm.js'
 
 Vue.use(VueDragging)
 
@@ -62,21 +63,20 @@ export const createTest = function(Compo, propsData = {}, mounted = false) {
  * @param  {String} name
  * @param  {*} opts
  */
-export const triggerEvent = function(elm, name, ...opts) {
-    if (typeof CustomEvent === 'function') {
-        const evt = new CustomEvent(name, ...opts);
+export const triggerEvent = function(elm, name, custoOpt, ...opts) {
+    if (CustomEvent) {
+        const evt = new CustomEvent(name, custoOpt);
         elm.dispatchEvent(evt);
     } else {
         let eventName;
-        if (/^mouse|click/.test(name)) {
-        eventName = 'MouseEvents';
+        if (/^mouse|click|drag/.test(name)) {
+            eventName = 'MouseEvents';
         } else if (/^key/.test(name)) {
-        eventName = 'KeyboardEvent';
+            eventName = 'KeyboardEvent';
         } else {
-        eventName = 'HTMLEvents';
+            eventName = 'HTMLEvents';
         }
         const evt = document.createEvent(eventName);
-
         evt.initEvent(name, ...opts);
         elm.dispatchEvent
         ? elm.dispatchEvent(evt)

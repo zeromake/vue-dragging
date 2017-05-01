@@ -7,6 +7,7 @@
     <title>vue-dragging</title>
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"/>
     <script src="https://cdn.bootcss.com/vue/2.2.6/vue.js"></script>
+    <script src="https://cdn.bootcss.com/vue-router/2.5.2/vue-router.js"></script>
     <!-- <script src="https://cdn.bootcss.com/vue/1.0.28/vue.js"></script> -->
     <script type="text/javascript" src="./vue-dragging.es5.js"></script>
     <style>
@@ -106,11 +107,67 @@
                 </div>
             </div>
         </div>
+        <h1>Router!</h1>
+        <p>
+            <router-link to="/foo">Go to Foo</router-link>
+            <router-link to="/bar">Go to Bar</router-link>
+        </p>
+        <router-view></router-view>
     </div>
     <script>
         Vue.use(VueDragging)
+        Vue.use(VueDragging)
+        const Foo = {
+            template: `<div class="color-show" v-dragevent="{ group: 'color3', list: colors2, dragged: handleDragged, dragend: handleDragend }">
+                        <div
+                        v-for="color in colors2"
+                        v-dragging="{ item: color, group: 'color3' }"
+                        class="color-box"
+                        :style="{'background-color': color.text}"
+                        :key="color.text">
+                        {{color.text}}
+                        </div>
+                    </div>
+                </div>`,
+                data: function() {
+                    return {
+                    colors2: [{
+                        text: "Aquamarine"
+                    }, {
+                        text: "Hotpink"
+                    }, {
+                        text: "Gold"
+                    }]
+                    }
+                },
+                methods: {
+                    handleDragged: function(data) {
+                        console.log('dragged', data)
+                    },
+                    handleDragend: function(data) {
+                        console.log('dragend', data)
+                    }
+                },
+                mounted: function () {
+                }
+            }
+            const Bar = {
+                template: '<div>Bar</div>',
+                data: function() {
+                    return {}
+                },
+
+            }
+        const routes = [
+            { path: '/foo', component: Foo },
+            { path: '/bar', component: Bar }
+        ]
+        const router = new VueRouter({
+        routes: routes
+        })
         new Vue({
             el: '#root',
+            router: router,
             data: {
                 colors: [{
                 text: "Aquamarine"
@@ -166,15 +223,21 @@
                         text: "Burlywood"
                     }]
                  this.colorShow = !this.colorShow
+                },
+                handleDragged: function(data) {
+                    console.log('dragged', data)
+                },
+                handleDragend: function(data) {
+                    console.log('dragend', data)
                 }
             },
             mounted: function() {
-                this.$dragging.$on('dragged', function(data) {
-                    console.log('dragged', data)
-                })
-                this.$dragging.$on('dragend', function(data) {
-                    console.log('dragend', data)
-                })
+                this.$dragging.$on('dragged', 'color', this.handleDragged)
+                this.$dragging.$on('dragend', 'color', this.handleDragend)
+            },
+            beforeDestroy: function() {
+                this.$dragging.$on('dragged', 'color', this.handleDragged)
+                this.$dragging.$on('dragend', 'color', this.handleDragend)
             }
         })
     </script>

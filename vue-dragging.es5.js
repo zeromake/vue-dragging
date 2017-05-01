@@ -44,14 +44,16 @@ var DragData = function () {
 
 var $dragging = {
     listeners: {},
-    $on: function $on(event, func) {
-        var events = this.listeners[event];
-        if (!events) {
-            this.listeners[event] = [];
+    $on: function $on(event, group, func) {
+        if (!this.listeners[group]) {
+            this.listeners[group] = {};
         }
-        this.listeners[event].push(func);
+        if (!this.listeners[group][event]) {
+            this.listeners[group][event] = [];
+        }
+        this.listeners[group][event].push(func);
     },
-    $once: function $once(event, func) {
+    $once: function $once(event, group, func) {
         var vm = this;
         function on() {
             vm.$off(event, on);
@@ -62,20 +64,24 @@ var $dragging = {
 
             func.apply(vm, args);
         }
-        this.$on(event, on);
+        this.$on(event, group, on);
     },
-    $off: function $off(event, func) {
-        var events = this.listeners[event];
-        if (!func || !events) {
-            this.listeners[event] = [];
+    $off: function $off(event, group, func) {
+        var events = this.listeners[group];
+        if (!func || !this.listeners[group] || !this.listeners[group][event]) {
+            if (!this.listeners[group]) {
+                this.listeners[group] = {};
+            } else {
+                this.listeners[group][event] = [];
+            }
             return;
         }
-        this.listeners[event] = this.listeners[event].filter(function (i) {
+        this.listeners[group][event] = this.listeners[group][event].filter(function (i) {
             return i !== func;
         });
     },
-    $emit: function $emit(event, context) {
-        var events = this.listeners[event];
+    $emit: function $emit(event, group, context) {
+        var events = this.listeners[group] ? this.listeners[group][event] : null;
         if (events && events.length > 0) {
             events.forEach(function (func) {
                 func(context);
@@ -172,11 +178,10 @@ var vueDragging = function (Vue, options) {
         swapArrayElements(DDD.List, indexFrom, indexTo);
         Current.index = indexTo;
         isSwap = true;
-        $dragging.$emit('dragged', {
+        $dragging.$emit('dragged', key, {
             draged: Current.item,
             to: item,
-            value: DDD.value,
-            group: key
+            value: DDD.value
         });
     }
 
@@ -193,7 +198,7 @@ var vueDragging = function (Vue, options) {
         // if (isSwap) {
         isSwap = false;
         var group = el.getAttribute('drag_group');
-        $dragging.$emit('dragend', { group: group });
+        $dragging.$emit('dragend', group);
         // }
     }
 
@@ -281,7 +286,27 @@ var vueDragging = function (Vue, options) {
         _.off(el, 'touchmove', handleDragEnter);
         _.off(el, 'touchend', handleDragEnd);
     }
-
+    function bindEvent(value) {
+        var group = value.group;
+        var dragend = value.dragend;
+        var dragged = value.dragged;
+        var list = value.list;
+        if (list) {
+            var DDD = dragData.new(group);
+            if (DDD.List !== list) {
+                DDD.List = list;
+            }
+        }
+        dragged && $dragging.$on('dragged', group, dragged);
+        dragend && $dragging.$on('dragend', group, dragend);
+    }
+    function unbindEvent(value) {
+        var group = value.group;
+        var dragged = value.dragged;
+        var dragend = value.dragend;
+        dragged && $dragging.$off('dragged', group, dragged);
+        dragend && $dragging.$off('dragend', group, dragend);
+    }
     Vue.prototype.$dragging = $dragging;
     if (!isPreVue) {
         Vue.directive('dragging', {
@@ -303,6 +328,18 @@ var vueDragging = function (Vue, options) {
 
             unbind: removeDragItem
         });
+        Vue.directive('dragevent', {
+            bind: function bind(el, binding) {
+                bindEvent(binding.value);
+            },
+            update: function update(el, binding) {
+                unbindEvent(binding.oldValue);
+                bindEvent(binding.value);
+            },
+            unbind: function unbind(el, binding) {
+                unbindEvent(binding.value);
+            }
+        });
     } else {
         Vue.directive('dragging', {
             update: function update(newValue, oldValue) {
@@ -321,6 +358,17 @@ var vueDragging = function (Vue, options) {
                     oldValue: oldValue
                 });
             }
+        });
+        Vue.directive('dragevent', {
+            update: function update(newValue, oldValue) {
+                var oldDragged = oldValue.dragged;
+                var oldDragend = oldValue.dragend;
+                oldDragged && $dragging.$off('dragged', oldDragged);
+                oldDragend && $dragging.$off('dragend', oldDragend);
+                bindEvent(newValue);
+            },
+
+            unbind: unbindEvent
         });
     }
 };

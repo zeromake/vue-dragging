@@ -1,10 +1,14 @@
 import { createVue, destroyVM, triggerEvent } from '../util';
-describe('Test', function() {
+describe('Test drag', function() {
     let vm
     afterEach(() => {
-        //destroyVM(vm)
+        destroyVM(vm)
     })
-    it('should run in the browser not Mocha', function () {
+    it('drag list change', function () {
+        const colors = [
+            { text: "red" },
+            { text: "block" }
+        ]
         vm = createVue({
             template: `
             <div class="list">
@@ -19,16 +23,21 @@ describe('Test', function() {
             `,
             data: function() {
                 return {
-                    colors: [
-                        { text: "red" },
-                        { text: "block" }
-                    ]
+                    colors: colors
                 }
             }
-        }, true)
-        const obj1 = vm.$el.children[0]
-        const obj2 = vm.$el.children[1]
-        triggerEvent(obj1, 'dragstart')
-        triggerEvent(obj2, 'dragenter')
+        })
+        let obj1 = vm.$el.children[0]
+        let obj2 = vm.$el.children[1]
+        triggerEvent(obj1, 'dragstart', null, true, true)
+        triggerEvent(obj2, 'dragenter', null, true, true)
+        expect(colors[0].text).to.equal('block')
+        expect(colors[1].text).to.equal('red')
+        obj1 = vm.$el.children[0]
+        obj2 = vm.$el.children[1]
+        triggerEvent(obj1, 'dragstart', null, true, true)
+        triggerEvent(obj2, 'dragenter', null, true, true)
+        expect(colors[0].text).to.equal('red')
+        expect(colors[1].text).to.equal('block')
     })
 })

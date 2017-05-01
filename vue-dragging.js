@@ -22,31 +22,39 @@ class DragData {
 const $dragging = {
     listeners: {
     },
-    $on (event, func) {
-        const events = this.listeners[event]
-        if (!events) {
-            this.listeners[event] = []
+    $on (event, group, func) {
+        if (!this.listeners[group]) {
+            this.listeners[group] = {
+            }
         }
-        this.listeners[event].push(func)
+        if (!this.listeners[group][event]) {
+            this.listeners[group][event] = []
+        }
+        this.listeners[group][event].push(func)
     },
-    $once (event, func) {
+    $once (event, group, func) {
         const vm = this
         function on (...args) {
             vm.$off(event, on)
             func.apply(vm, args)
         }
-        this.$on(event, on)
+        this.$on(event, group, on)
     },
-    $off (event, func) {
-        const events = this.listeners[event]
-        if (!func || !events) {
-            this.listeners[event] = []
+    $off (event, group, func) {
+        const events = this.listeners[group]
+        if (!func || !this.listeners[group] || !this.listeners[group][event]) {
+            if (!this.listeners[group]) {
+                this.listeners[group] = {
+                }
+            } else {
+                this.listeners[group][event] = []
+            }
             return
         }
-        this.listeners[event] = this.listeners[event].filter(i => i !== func)
+        this.listeners[group][event] = this.listeners[group][event].filter(i => i !== func)
     },
-    $emit (event, context) {
-        const events = this.listeners[event]
+    $emit (event, group, context) {
+        const events = this.listeners[group] ? this.listeners[group][event] : null
         if (events && events.length > 0) {
             events.forEach(func => {
                 func(context)
@@ -143,11 +151,10 @@ export default function (Vue, options) {
         swapArrayElements(DDD.List, indexFrom, indexTo)
         Current.index = indexTo
         isSwap = true
-        $dragging.$emit('dragged', {
+        $dragging.$emit('dragged', key, {
             draged: Current.item,
             to: item,
-            value: DDD.value,
-            group: key
+            value: DDD.value
         })
     }
 
@@ -165,7 +172,7 @@ export default function (Vue, options) {
         // if (isSwap) {
         isSwap = false
         const group = el.getAttribute('drag_group')
-        $dragging.$emit('dragend', { group })
+        $dragging.$emit('dragend', group)
         // }
     }
 
@@ -253,7 +260,27 @@ export default function (Vue, options) {
         _.off(el, 'touchmove', handleDragEnter)
         _.off(el, 'touchend', handleDragEnd)
     }
-
+    function bindEvent(value) {
+        const group = value.group
+        const dragend = value.dragend
+        const dragged = value.dragged
+        const list = value.list
+        if (list) {
+            const DDD = dragData.new(group)
+            if (DDD.List !== list) {
+                DDD.List = list
+            }
+        }
+        dragged && $dragging.$on('dragged', group, dragged)
+        dragend && $dragging.$on('dragend', group, dragend)
+    }
+    function unbindEvent(value) {
+        const group = value.group
+        const dragged = value.dragged
+        const dragend = value.dragend
+        dragged && $dragging.$off('dragged', group, dragged)
+        dragend && $dragging.$off('dragend', group, dragend)
+    }
     Vue.prototype.$dragging = $dragging
     if (!isPreVue) {
         Vue.directive('dragging', {
@@ -274,6 +301,18 @@ export default function (Vue, options) {
             },
             unbind : removeDragItem
         })
+        Vue.directive('dragevent', {
+            bind(el, binding) {
+                bindEvent(binding.value)
+            },
+            update(el, binding) {
+                unbindEvent(binding.oldValue)
+                bindEvent(binding.value)
+            },
+            unbind(el, binding) {
+                unbindEvent(binding.value)
+            }
+        })
     } else {
         Vue.directive('dragging', {
             update (newValue, oldValue) {
@@ -292,6 +331,16 @@ export default function (Vue, options) {
                     oldValue: oldValue
                 })
             }
+        })
+        Vue.directive('dragevent', {
+            update(newValue, oldValue) {
+                const oldDragged = oldValue.dragged
+                const oldDragend = oldValue.dragend
+                oldDragged && $dragging.$off('dragged', oldDragged)
+                oldDragend && $dragging.$off('dragend', oldDragend)
+                bindEvent(newValue)
+            },
+            unbind: unbindEvent
         })
     }
 }
