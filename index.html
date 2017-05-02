@@ -232,12 +232,12 @@
                 }
             },
             mounted: function() {
-                this.$dragging.$on('dragged', 'color', this.handleDragged)
-                this.$dragging.$on('dragend', 'color', this.handleDragend)
+                this.$dragging.$on('dragged', this.handleDragged, 'color')
+                this.$dragging.$on('dragend', this.handleDragend, 'color')
             },
             beforeDestroy: function() {
-                this.$dragging.$on('dragged', 'color', this.handleDragged)
-                this.$dragging.$on('dragend', 'color', this.handleDragend)
+                this.$dragging.$on('dragged', this.handleDragged, 'color')
+                this.$dragging.$on('dragend', this.handleDragend, 'color')
             }
         })
     </script>
