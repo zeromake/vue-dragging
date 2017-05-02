@@ -44,7 +44,7 @@ var DragData = function () {
 
 var $dragging = {
     listeners: {},
-    $on: function $on(event, group, func) {
+    $on: function $on(event, func, group) {
         if (!this.listeners[group]) {
             this.listeners[group] = {};
         }
@@ -53,7 +53,7 @@ var $dragging = {
         }
         this.listeners[group][event].push(func);
     },
-    $once: function $once(event, group, func) {
+    $once: function $once(event, func, group) {
         var vm = this;
         function on() {
             vm.$off(event, on);
@@ -66,7 +66,7 @@ var $dragging = {
         }
         this.$on(event, group, on);
     },
-    $off: function $off(event, group, func) {
+    $off: function $off(event, func, group) {
         var events = this.listeners[group];
         if (!func || !this.listeners[group] || !this.listeners[group][event]) {
             if (!this.listeners[group]) {
@@ -80,7 +80,7 @@ var $dragging = {
             return i !== func;
         });
     },
-    $emit: function $emit(event, group, context) {
+    $emit: function $emit(event, context, group) {
         var events = this.listeners[group] ? this.listeners[group][event] : null;
         if (events && events.length > 0) {
             events.forEach(function (func) {
@@ -178,11 +178,12 @@ var vueDragging = function (Vue, options) {
         swapArrayElements(DDD.List, indexFrom, indexTo);
         Current.index = indexTo;
         isSwap = true;
-        $dragging.$emit('dragged', key, {
+        $dragging.$emit('dragged', {
             draged: Current.item,
             to: item,
-            value: DDD.value
-        });
+            value: DDD.value,
+            group: key
+        }, key);
     }
 
     function handleDragLeave(e) {
@@ -198,7 +199,7 @@ var vueDragging = function (Vue, options) {
         // if (isSwap) {
         isSwap = false;
         var group = el.getAttribute('drag_group');
-        $dragging.$emit('dragend', group);
+        $dragging.$emit('dragend', { group: group }, group);
         // }
     }
 
@@ -297,15 +298,15 @@ var vueDragging = function (Vue, options) {
                 DDD.List = list;
             }
         }
-        dragged && $dragging.$on('dragged', group, dragged);
-        dragend && $dragging.$on('dragend', group, dragend);
+        dragged && $dragging.$on('dragged', dragged, group);
+        dragend && $dragging.$on('dragend', dragend, group);
     }
     function unbindEvent(value) {
         var group = value.group;
         var dragged = value.dragged;
         var dragend = value.dragend;
-        dragged && $dragging.$off('dragged', group, dragged);
-        dragend && $dragging.$off('dragend', group, dragend);
+        dragged && $dragging.$off('dragged', dragged, group);
+        dragend && $dragging.$off('dragend', dragend, group);
     }
     Vue.prototype.$dragging = $dragging;
     if (!isPreVue) {

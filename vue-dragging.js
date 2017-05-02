@@ -22,7 +22,7 @@ class DragData {
 const $dragging = {
     listeners: {
     },
-    $on (event, group, func) {
+    $on (event, func, group) {
         if (!this.listeners[group]) {
             this.listeners[group] = {
             }
@@ -32,7 +32,7 @@ const $dragging = {
         }
         this.listeners[group][event].push(func)
     },
-    $once (event, group, func) {
+    $once (event, func, group) {
         const vm = this
         function on (...args) {
             vm.$off(event, on)
@@ -40,7 +40,7 @@ const $dragging = {
         }
         this.$on(event, group, on)
     },
-    $off (event, group, func) {
+    $off (event, func, group) {
         const events = this.listeners[group]
         if (!func || !this.listeners[group] || !this.listeners[group][event]) {
             if (!this.listeners[group]) {
@@ -53,7 +53,7 @@ const $dragging = {
         }
         this.listeners[group][event] = this.listeners[group][event].filter(i => i !== func)
     },
-    $emit (event, group, context) {
+    $emit (event, context, group) {
         const events = this.listeners[group] ? this.listeners[group][event] : null
         if (events && events.length > 0) {
             events.forEach(func => {
@@ -151,11 +151,12 @@ export default function (Vue, options) {
         swapArrayElements(DDD.List, indexFrom, indexTo)
         Current.index = indexTo
         isSwap = true
-        $dragging.$emit('dragged', key, {
+        $dragging.$emit('dragged', {
             draged: Current.item,
             to: item,
-            value: DDD.value
-        })
+            value: DDD.value,
+            group: key
+        }, key)
     }
 
     function handleDragLeave(e) {
@@ -172,7 +173,7 @@ export default function (Vue, options) {
         // if (isSwap) {
         isSwap = false
         const group = el.getAttribute('drag_group')
-        $dragging.$emit('dragend', group)
+        $dragging.$emit('dragend', { group }, group)
         // }
     }
 
@@ -271,15 +272,15 @@ export default function (Vue, options) {
                 DDD.List = list
             }
         }
-        dragged && $dragging.$on('dragged', group, dragged)
-        dragend && $dragging.$on('dragend', group, dragend)
+        dragged && $dragging.$on('dragged', dragged, group)
+        dragend && $dragging.$on('dragend', dragend, group)
     }
     function unbindEvent(value) {
         const group = value.group
         const dragged = value.dragged
         const dragend = value.dragend
-        dragged && $dragging.$off('dragged', group, dragged)
-        dragend && $dragging.$off('dragend', group, dragend)
+        dragged && $dragging.$off('dragged', dragged, group)
+        dragend && $dragging.$off('dragend', dragend, group)
     }
     Vue.prototype.$dragging = $dragging
     if (!isPreVue) {
