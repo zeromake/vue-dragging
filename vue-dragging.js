@@ -22,7 +22,7 @@ class DragData {
 const $dragging = {
     listeners: {
     },
-    $on (event, func, group) {
+    $on (event, func, group='$default') {
         if (!this.listeners[group]) {
             this.listeners[group] = {
             }
@@ -32,15 +32,15 @@ const $dragging = {
         }
         this.listeners[group][event].push(func)
     },
-    $once (event, func, group) {
+    $once (event, func, group='$default') {
         const vm = this
-        function on (...args) {
-            vm.$off(event, on)
-            func.apply(vm, args)
+        function on (context) {
+            vm.$off(event, on, group)
+            func(context)
         }
-        this.$on(event, group, on)
+        this.$on(event, on, group)
     },
-    $off (event, func, group) {
+    $off (event, func, group='$default') {
         const events = this.listeners[group]
         if (!func || !this.listeners[group] || !this.listeners[group][event]) {
             if (!this.listeners[group]) {
@@ -53,12 +53,19 @@ const $dragging = {
         }
         this.listeners[group][event] = this.listeners[group][event].filter(i => i !== func)
     },
-    $emit (event, context, group) {
+    $emit (event, context, group='$default') {
         const events = this.listeners[group] ? this.listeners[group][event] : null
         if (events && events.length > 0) {
             events.forEach(func => {
                 func(context)
             })
+        } else if (group !== '$default') {
+            const defevents = this.listeners['$default'] ? this.listeners['$default'][event] : null
+            if (defevents && defevents.length > 0) {
+                defevents.forEach(func => {
+                    func(context)
+                })
+            }
         }
     }
 }

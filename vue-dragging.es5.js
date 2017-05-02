@@ -44,7 +44,9 @@ var DragData = function () {
 
 var $dragging = {
     listeners: {},
-    $on: function $on(event, func, group) {
+    $on: function $on(event, func) {
+        var group = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '$default';
+
         if (!this.listeners[group]) {
             this.listeners[group] = {};
         }
@@ -53,20 +55,19 @@ var $dragging = {
         }
         this.listeners[group][event].push(func);
     },
-    $once: function $once(event, func, group) {
+    $once: function $once(event, func) {
+        var group = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '$default';
+
         var vm = this;
-        function on() {
-            vm.$off(event, on);
-
-            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-                args[_key] = arguments[_key];
-            }
-
-            func.apply(vm, args);
+        function on(context) {
+            vm.$off(event, on, group);
+            func(context);
         }
-        this.$on(event, group, on);
+        this.$on(event, on, group);
     },
-    $off: function $off(event, func, group) {
+    $off: function $off(event, func) {
+        var group = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '$default';
+
         var events = this.listeners[group];
         if (!func || !this.listeners[group] || !this.listeners[group][event]) {
             if (!this.listeners[group]) {
@@ -80,12 +81,21 @@ var $dragging = {
             return i !== func;
         });
     },
-    $emit: function $emit(event, context, group) {
+    $emit: function $emit(event, context) {
+        var group = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '$default';
+
         var events = this.listeners[group] ? this.listeners[group][event] : null;
         if (events && events.length > 0) {
             events.forEach(function (func) {
                 func(context);
             });
+        } else if (group !== '$default') {
+            var defevents = this.listeners['$default'] ? this.listeners['$default'][event] : null;
+            if (defevents && defevents.length > 0) {
+                defevents.forEach(function (func) {
+                    func(context);
+                });
+            }
         }
     }
 };
