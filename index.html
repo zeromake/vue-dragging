@@ -236,8 +236,8 @@
                 this.$dragging.$on('dragend', this.handleDragend)
             },
             beforeDestroy: function() {
-                this.$dragging.$on('dragged', this.handleDragged)
-                this.$dragging.$on('dragend', this.handleDragend)
+                this.$dragging.$off('dragged', this.handleDragged)
+                this.$dragging.$off('dragend', this.handleDragend)
             }
         })
     </script>
