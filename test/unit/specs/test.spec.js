@@ -1,4 +1,4 @@
-import { createVue, destroyVM, triggerEvent } from '../util';
+const { createVue, destroyVM, triggerEvent } = require('../util')
 describe('Test drag', function() {
     let vm
     afterEach(() => {

@@ -1,19 +1,50 @@
 const path = require('path')
 const srcPath = path.resolve(__dirname, '../../')
-const babel = require('rollup-plugin-babel')
-const replace = require('rollup-plugin-replace')
+
+const babelConfig = {
+    loader: 'babel-loader',
+    options: {
+        presets: ['es2015']
+    }
+}
 
 module.exports = function(config) {
     config.set({
+        webpack: {
+            devtool: 'inline-source-map',//'#source-map',
+            resolve: {
+                alias: {
+                    'vue$': 'vue/dist/vue.esm.js',
+                    '@': srcPath
+                }
+            },
+            module: {
+                rules: [
+                    {
+                        test: /\.js/,
+                        use: [
+                            'istanbul-instrumenter-loader',
+                            babelConfig
+                        ],
+                        include: [path.resolve(srcPath, 'vue-dragging.js')]
+                    },
+                    {
+                        test: /\.js/,
+                        exclude: /node_modules/,
+                        use: babelConfig
+                    }
+                ]
+            }
+        },
         frameworks: ['mocha', 'sinon-chai'],
         files: [
-            './specs/*.spec.js'
+            './index.js'
         ],
         preprocessors: {
-            './specs/*.spec.js': ['rollup']
+            './index.js': ['webpack', 'sourcemap']
         },
         // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-        reporters: ['spec'],
+        reporters: ['spec', 'coverage-istanbul'],
         port: 9876,
         colors: true,
         logLevel: config.LOG_INFO,
@@ -22,14 +53,16 @@ module.exports = function(config) {
         browsers: ['PhantomJS'],
         singleRun: false,
         concurrency: Infinity,
-        rollupPreprocessor: {
-            plugins: [ babel(), replace({
-                "process.env.NODE_ENV": '"development"'
-            })],
-            moduleName: 'VueDragging',
-            format: 'iife',
-            sourceMap: 'inline',
+        coverageIstanbulReporter: {
+            reports: ['html', 'lcovonly', 'text-summary'],
+            dir: path.join(__dirname, 'coverage'),
+            fixWebpackSourcePaths: true,
+            'report-config': {
+                html: {
+                    subdir: 'html'
+                }
 
+            }
         }
     })
 }

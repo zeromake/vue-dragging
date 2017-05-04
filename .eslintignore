@@ -1,0 +1,4 @@
+webpack.config.js
+vue-dragging.es5.js
+test/**/*.js
+index.html

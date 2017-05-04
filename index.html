@@ -61,16 +61,16 @@
         <div class="playground">
             <!-- vue1 test -->
             <!-- <div class="color-list">
-                <div 
-                class="color-item" 
-                v-for="color in colors" 
+                <div
+                class="color-item"
+                v-for="color in colors"
                 v-dragging="{ item: color, list: colors, group: 'color', key: color.text }">{{color.text}}</div>
             </div>
             <div class="color-show">
-                <div 
+                <div
                 v-for="color in colors"
                 v-dragging="{ item: color, list: colors, group: 'color', key: color.text }"
-                class="color-box" 
+                class="color-box"
                 :style="{'background-color': color.text}">
                 {{color.text}}
                 </div>
@@ -78,18 +78,18 @@
             <!-- vue2 test -->
             <div class="color-list">
                 <div
-                class="color-item" 
-                v-for="color in colors" 
+                class="color-item"
+                v-for="color in colors"
                 v-dragging="{ list: colors, item: color, group: 'color' }"
                 :key="color.text">
                 {{color.text}}
                 </div>
             </div>
             <div class="color-show">
-                <div 
+                <div
                 v-for="color in colors"
                 v-dragging="{ list: colors, item: color, group: 'color' }"
-                class="color-box" 
+                class="color-box"
                 :style="{'background-color': color.text}"
                 :key="color.text">
                 {{color.text}}
@@ -115,7 +115,6 @@
         <router-view></router-view>
     </div>
     <script>
-        Vue.use(VueDragging)
         Vue.use(VueDragging)
         const Foo = {
             template: `<div class="color-show" v-dragevent="{ group: 'color3', list: colors2, dragged: handleDragged, dragend: handleDragend }">
@@ -163,7 +162,7 @@
             { path: '/bar', component: Bar }
         ]
         const router = new VueRouter({
-        routes: routes
+            routes: routes
         })
         new Vue({
             el: '#root',

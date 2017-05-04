@@ -1,20 +1,19 @@
 class DragData {
-    constructor () {
-        this.data = {}
+    constructor() {
+        this.data = {};
     }
-
-    new (key) {
+    new(key) {
         if (!this.data[key]) {
             this.data[key] = {
                 className: '',
                 List: [],
                 KEY_MAP: {}
-            }
+            };
         }
         return this.data[key]
     }
 
-    get (key) {
+    get(key) {
         return this.data[key]
     }
 }
@@ -41,7 +40,6 @@ const $dragging = {
         this.$on(event, on, group)
     },
     $off (event, func, group='$default') {
-        const events = this.listeners[group]
         if (!func || !this.listeners[group] || !this.listeners[group][event]) {
             if (!this.listeners[group]) {
                 this.listeners[group] = {
@@ -60,7 +58,7 @@ const $dragging = {
                 func(context)
             })
         } else if (group !== '$default') {
-            const defevents = this.listeners['$default'] ? this.listeners['$default'][event] : null
+            const defevents = this.listeners.$default ? this.listeners.$default[event] : null
             if (defevents && defevents.length > 0) {
                 defevents.forEach(func => {
                     func(context)
@@ -96,10 +94,9 @@ const _ = {
     }
 }
 
-export default function (Vue, options) {
+function VueDragging (Vue) {
     const isPreVue = Vue.version.split('.')[0] === '1'
     const dragData = new DragData()
-    let isSwap = false
     let Current = null
 
     function handleDragStart(e) {
@@ -157,7 +154,6 @@ export default function (Vue, options) {
 
         swapArrayElements(DDD.List, indexFrom, indexTo)
         Current.index = indexTo
-        isSwap = true
         $dragging.$emit('dragged', {
             draged: Current.item,
             to: item,
@@ -170,18 +166,15 @@ export default function (Vue, options) {
         _.removeClass(getBlockEl(e.target), 'drag-over', 'drag-enter')
     }
 
-    function handleDrag (e) {
+    function handleDrag () {
     }
 
     function handleDragEnd (e) {
         const el = getBlockEl(e.target)
         _.removeClass(el, 'dragging', 'drag-over', 'drag-enter')
         Current = null
-        // if (isSwap) {
-        isSwap = false
         const group = el.getAttribute('drag_group')
         $dragging.$emit('dragend', { group }, group)
-        // }
     }
 
     function handleDrop(e) {
@@ -197,7 +190,6 @@ export default function (Vue, options) {
         while (el.parentNode) {
             if (el.getAttribute && el.getAttribute('drag_block')) {
                 return el
-                break
             } else {
                 el = el.parentNode
             }
@@ -352,3 +344,4 @@ export default function (Vue, options) {
         })
     }
 }
+module.exports = VueDragging

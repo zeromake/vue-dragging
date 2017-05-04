@@ -2,3 +2,5 @@
 node_modules
 dist
 npm-debug.log
+vue-dragging.es5.js.map
+test/unit/coverage
