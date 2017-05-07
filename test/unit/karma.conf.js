@@ -1,13 +1,6 @@
 const path = require('path')
 const srcPath = path.resolve(__dirname, '../../')
 
-const babelConfig = {
-    loader: 'babel-loader',
-    options: {
-        presets: ['es2015']
-    }
-}
-
 module.exports = function(config) {
     config.set({
         webpack: {
@@ -21,14 +14,20 @@ module.exports = function(config) {
             module: {
                 rules: [
                     {
-                        test: /\.js/,
-                        exclude: /(node_modules|vue-dragging\.js)/,
-                        use: babelConfig
+                        test: /vue-dragging\.js/,
+                        enforce: 'pre',
+                        use: 'istanbul-instrumenter-loader',
+                        include: [path.resolve(srcPath, 'vue-dragging.js')]
                     },
                     {
-                        test: /vue-dragging\.js/,
-                        use: [babelConfig, 'istanbul-instrumenter-loader'],
-                        include: [path.resolve(srcPath, 'vue-dragging.js')]
+                        test: /\.js/,
+                        exclude: /node_modules/,
+                        use: {
+                            loader: 'babel-loader',
+                            options: {
+                                presets: ['es2015']
+                            }
+                        }
                     }
                 ]
             }
@@ -38,7 +37,7 @@ module.exports = function(config) {
             './index.js'
         ],
         preprocessors: {
-            './index.js': ['webpack']
+            './index.js': ['webpack', 'sourcemap']
         },
         // available reporters: https://npmjs.org/browse/keyword/karma-reporter
         reporters: ['spec', 'coverage-istanbul'],
@@ -49,7 +48,6 @@ module.exports = function(config) {
         // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
         browsers: ['PhantomJS'],
         singleRun: false,
-        concurrency: Infinity,
         coverageIstanbulReporter: {
             reports: ['html', 'lcovonly', 'text-summary'],
             dir: path.join(__dirname, 'coverage'),
@@ -58,7 +56,6 @@ module.exports = function(config) {
                 html: {
                     subdir: 'html'
                 }
-
             }
         }
     })

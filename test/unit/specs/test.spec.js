@@ -2,7 +2,9 @@ const { createVue, destroyVM, triggerEvent } = require('../util')
 describe('Test drag', function() {
     let vm
     afterEach(() => {
-        destroyVM(vm)
+        if (vm) {
+            destroyVM(vm)
+        }
     })
     it('drag list change', function () {
         const colors = [
