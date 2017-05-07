@@ -25,6 +25,11 @@ describe('Test drag', function() {
                 return {
                     colors: colors
                 }
+            },
+            mounted: function() {
+                this.$dragging.$on('dragged', function({group}) {
+                    expect(group).to.equal('color')
+                })
             }
         })
         let obj1 = vm.$el.children[0]

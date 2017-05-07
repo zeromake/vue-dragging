@@ -22,16 +22,13 @@ module.exports = function(config) {
                 rules: [
                     {
                         test: /\.js/,
-                        use: [
-                            'istanbul-instrumenter-loader',
-                            babelConfig
-                        ],
-                        include: [path.resolve(srcPath, 'vue-dragging.js')]
+                        exclude: /(node_modules|vue-dragging\.js)/,
+                        use: babelConfig
                     },
                     {
-                        test: /\.js/,
-                        exclude: /node_modules/,
-                        use: babelConfig
+                        test: /vue-dragging\.js/,
+                        use: [babelConfig, 'istanbul-instrumenter-loader'],
+                        include: [path.resolve(srcPath, 'vue-dragging.js')]
                     }
                 ]
             }
@@ -41,7 +38,7 @@ module.exports = function(config) {
             './index.js'
         ],
         preprocessors: {
-            './index.js': ['webpack', 'sourcemap']
+            './index.js': ['webpack']
         },
         // available reporters: https://npmjs.org/browse/keyword/karma-reporter
         reporters: ['spec', 'coverage-istanbul'],
