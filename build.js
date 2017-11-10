@@ -12,15 +12,15 @@ var banner =
   ' */'
 
 rollup.rollup({
-    entry: path.resolve(__dirname, 'vue-dragging.js'),
+    input: path.resolve(__dirname, 'vue-dragging.js'),
     plugins: [ babel() ]
 })
 .then(bundle => {
-    return write(path.resolve(__dirname, 'vue-dragging.es5.js'), bundle.generate({
+    return bundle.generate({
         format: 'umd',
         banner: banner,
         moduleName: 'VueDragging'
-    }).code)
+    }).then(data => write(path.resolve(__dirname, 'vue-dragging.es5.js'), data.code))
 })
 .then(() => {
     console.log('Awe-dnd v' + version + ' builded')

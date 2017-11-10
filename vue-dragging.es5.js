@@ -1,5 +1,5 @@
 /*!
- * Awe-dnd v0.3.0
+ * Awe-dnd v1.0.0
  * (c) 2017 Awe <hilongjw@gmail.com>
  * Released under the MIT License.
  */
@@ -129,7 +129,6 @@ var _ = {
 var vueDragging = function (Vue, options) {
     var isPreVue = Vue.version.split('.')[0] === '1';
     var dragData = new DragData();
-    var isSwap = false;
     var Current = null;
 
     function handleDragStart(e) {
@@ -187,7 +186,6 @@ var vueDragging = function (Vue, options) {
 
         swapArrayElements(DDD.List, indexFrom, indexTo);
         Current.index = indexTo;
-        isSwap = true;
         $dragging.$emit('dragged', {
             draged: Current.item,
             to: item,
@@ -207,7 +205,6 @@ var vueDragging = function (Vue, options) {
         _.removeClass(el, 'dragging', 'drag-over', 'drag-enter');
         Current = null;
         // if (isSwap) {
-        isSwap = false;
         var group = el.getAttribute('drag_group');
         $dragging.$emit('dragend', { group: group }, group);
         // }

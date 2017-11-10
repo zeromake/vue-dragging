@@ -26,9 +26,8 @@ module.exports = function(config) {
             plugins: [ babel(), replace({
                 "process.env.NODE_ENV": '"development"'
             })],
-            moduleName: 'VueDragging',
             format: 'iife',
-            sourceMap: 'inline',
+            sourcemap: 'inline',
 
         }
     })
