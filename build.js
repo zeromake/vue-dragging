@@ -6,8 +6,8 @@ var version = process.env.VERSION || require('./package.json').version
 
 var banner =
   '/*!\n' +
-  ' * Awe-dnd v' + version + '\n' +
-  ' * (c) ' + new Date().getFullYear() + ' Awe <hilongjw@gmail.com>\n' +
+  ' * zero-dnd v' + version + '\n' +
+  ' * (c) ' + new Date().getFullYear() + ' zeromake <a390720046@gmail.com>\n' +
   ' * Released under the MIT License.\n' +
   ' */'
 
@@ -19,7 +19,7 @@ rollup.rollup({
     return bundle.generate({
         format: 'umd',
         banner: banner,
-        moduleName: 'VueDragging'
+        name: 'VueDragging'
     }).then(data => write(path.resolve(__dirname, 'vue-dragging.es5.js'), data.code))
 })
 .then(() => {

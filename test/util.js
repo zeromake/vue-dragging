@@ -1,6 +1,6 @@
-import Vue from '../../node_modules/vue/dist/vue.esm';
-import VueDragging from '../../vue-dragging.js'
-import VueRouter from '../../node_modules/vue-router/dist/vue-router.esm.js'
+import Vue from '../node_modules/vue/dist/vue.esm';
+import VueDragging from '../vue-dragging.js'
+import VueRouter from '../node_modules/vue-router/dist/vue-router.esm.js'
 
 Vue.use(VueDragging)
 
